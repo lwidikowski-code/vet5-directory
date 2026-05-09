@@ -31,10 +31,14 @@ export default function Home() {
   }
 
   async function handleSearch() {
+    if (!selectedState) return
+
     const { data } = await supabase
-      .from('service_animals')
+      .from('service_listings')
       .select(`
-        *,
+        id,
+        service_type,
+        notes,
         organizations (
           organization_name,
           website,
@@ -51,165 +55,286 @@ export default function Home() {
   }
 
   return (
-    <main style={{
-      background: '#eaf2fb',
-      minHeight: '100vh',
-      padding: '40px',
-      fontFamily: 'Arial'
-    }}>
-      <div style={{
-        maxWidth: '1300px',
-        margin: '0 auto',
-        background: '#ffffff',
-        borderRadius: '20px',
-        padding: '40px',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
-      }}>
-        
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '400px 1fr',
-          gap: '40px'
-        }}>
-          
-          <div>
-            <Image
-              src={logo}
-              alt="Vet2Vet4Vets"
-              style={{
-                width: '100%',
-                height: 'auto'
-              }}
-            />
+    <main
+      style={{
+        background: '#eaf2fb',
+        minHeight: '100vh',
+        padding: '40px 20px',
+        fontFamily: 'Arial, sans-serif'
+      }}
+    >
+      <div
+        style={{
+          maxWidth: '1400px',
+          margin: '0 auto'
+        }}
+      >
+        <div
+          style={{
+            background: '#ffffff',
+            borderRadius: '20px',
+            padding: '40px',
+            boxShadow: '0 4px 18px rgba(0,0,0,0.08)'
+          }}
+        >
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '400px 1fr',
+              gap: '40px'
+            }}
+          >
+            {/* LEFT COLUMN */}
+            <div>
+              <Image
+                src={logo}
+                alt="Vet2Vet4Vets"
+                style={{
+                  width: '100%',
+                  height: 'auto',
+                  marginBottom: '24px'
+                }}
+              />
 
-            <h1 style={{
-              color: '#12385b',
-              marginTop: '20px'
-            }}>
-              National Service Animal Directory
-            </h1>
+              <h1
+                style={{
+                  color: '#12385b',
+                  fontSize: '34px',
+                  marginBottom: '20px'
+                }}
+              >
+                National Service Animal Directory
+              </h1>
 
-            <p style={{
-              color: '#48637e',
-              lineHeight: '1.8'
-            }}>
-              Locate verified service animal organizations,
-              veteran support providers, PTSD dog programs,
-              and assistance resources across all 50 states.
-            </p>
-          </div>
+              <p
+                style={{
+                  color: '#48637e',
+                  lineHeight: '1.8',
+                  fontSize: '16px',
+                  marginBottom: '20px'
+                }}
+              >
+                The Vet2Vet4Vets National Service Animal Directory
+                connects veterans, caregivers, and organizations with
+                verified service animal providers and support programs
+                across all 50 states.
+              </p>
 
-          <div>
-            <div style={{
-              background: '#f8fbff',
-              padding: '24px',
-              borderRadius: '14px',
-              border: '1px solid #d9e4ef'
-            }}>
-              
-              <h2 style={{
-                color: '#12385b'
-              }}>
-                Search by State
-              </h2>
+              <p
+                style={{
+                  color: '#48637e',
+                  lineHeight: '1.8',
+                  fontSize: '16px'
+                }}
+              >
+                Search state-by-state listings for PTSD service dog
+                programs, mobility assistance, therapy animal support,
+                and additional veteran-focused resources.
+              </p>
 
-              <div style={{
-                display: 'flex',
-                gap: '12px',
-                marginTop: '20px'
-              }}>
-                
-                <select
-                  value={selectedState}
-                  onChange={(e) => setSelectedState(e.target.value)}
+              <div
+                style={{
+                  marginTop: '30px',
+                  background: '#f5f9fd',
+                  border: '1px solid #d9e4ef',
+                  borderRadius: '14px',
+                  padding: '20px'
+                }}
+              >
+                <h3
                   style={{
-                    width: '300px',
-                    padding: '14px',
-                    borderRadius: '8px',
-                    border: '1px solid #b7cadb'
+                    color: '#12385b',
+                    marginBottom: '12px'
                   }}
                 >
-                  <option value="">Select State</option>
+                  Directory Standards
+                </h3>
 
-                  {states.map((state) => (
-                    <option
-                      key={state.id}
-                      value={state.id}
-                    >
-                      {state.state_name}
-                    </option>
-                  ))}
-                </select>
-
-                <button
-                  onClick={handleSearch}
+                <p
                   style={{
-                    background: '#2f5f91',
-                    color: '#ffffff',
-                    border: 'none',
-                    borderRadius: '8px',
-                    padding: '14px 24px',
-                    cursor: 'pointer'
+                    color: '#4b647d',
+                    lineHeight: '1.7',
+                    fontSize: '15px'
                   }}
                 >
-                  Search
-                </button>
-
+                  This directory is maintained to support accurate,
+                  transparent, and accessible veteran assistance
+                  information nationwide.
+                </p>
               </div>
             </div>
 
-            <div style={{
-              marginTop: '30px'
-            }}>
-              
-              {results.map((item) => (
-                <div
-                  key={item.id}
+            {/* RIGHT COLUMN */}
+            <div>
+              <div
+                style={{
+                  background: '#f8fbff',
+                  border: '1px solid #d8e4ef',
+                  borderRadius: '14px',
+                  padding: '24px',
+                  marginBottom: '30px'
+                }}
+              >
+                <h2
                   style={{
-                    background: '#ffffff',
-                    borderLeft: '5px solid #2f5f91',
-                    padding: '24px',
-                    marginBottom: '20px',
-                    borderRadius: '12px',
-                    boxShadow: '0 2px 10px rgba(0,0,0,0.05)'
+                    color: '#12385b',
+                    marginBottom: '20px'
                   }}
                 >
-                  
-                  <h2 style={{
-                    color: '#12385b'
-                  }}>
-                    {item.organizations?.organization_name}
-                  </h2>
+                  Search by State
+                </h2>
 
-                  <p>
-                    <strong>State:</strong> {item.states?.state_name}
-                  </p>
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: '12px',
+                    flexWrap: 'wrap'
+                  }}
+                >
+                  <select
+                    value={selectedState}
+                    onChange={(e) =>
+                      setSelectedState(e.target.value)
+                    }
+                    style={{
+                      width: '320px',
+                      padding: '14px',
+                      borderRadius: '8px',
+                      border: '1px solid #b7cadb',
+                      fontSize: '16px',
+                      background: '#ffffff'
+                    }}
+                  >
+                    <option value="">
+                      Select State
+                    </option>
 
-                  <p>
-                    <strong>Service:</strong> {item.service_type}
-                  </p>
+                    {states.map((state) => (
+                      <option
+                        key={state.id}
+                        value={state.id}
+                      >
+                        {state.state_name}
+                      </option>
+                    ))}
+                  </select>
 
-                  <p>
-                    <strong>Website:</strong> {item.organizations?.website}
-                  </p>
-
-                  <p>
-                    <strong>Phone:</strong> {item.organizations?.phone}
-                  </p>
-
-                  <p>
-                    <strong>Email:</strong> {item.organizations?.email}
-                  </p>
-
+                  <button
+                    onClick={handleSearch}
+                    style={{
+                      background: '#2f5f91',
+                      color: '#ffffff',
+                      border: 'none',
+                      borderRadius: '8px',
+                      padding: '14px 24px',
+                      cursor: 'pointer',
+                      fontWeight: 'bold'
+                    }}
+                  >
+                    Search
+                  </button>
                 </div>
-              ))}
+              </div>
 
+              {/* RESULTS */}
+              <div
+                style={{
+                  display: 'grid',
+                  gap: '20px'
+                }}
+              >
+                {results.map((item) => (
+                  <div
+                    key={item.id}
+                    style={{
+                      background: '#ffffff',
+                      borderLeft: '5px solid #2f5f91',
+                      padding: '24px',
+                      borderRadius: '12px',
+                      boxShadow:
+                        '0 2px 10px rgba(0,0,0,0.05)'
+                    }}
+                  >
+                    <h2
+                      style={{
+                        color: '#12385b',
+                        marginBottom: '16px'
+                      }}
+                    >
+                      {
+                        item.organizations
+                          ?.organization_name
+                      }
+                    </h2>
+
+                    <p>
+                      <strong>State:</strong>{' '}
+                      {item.states?.state_name}
+                    </p>
+
+                    <p>
+                      <strong>Service:</strong>{' '}
+                      {item.service_type}
+                    </p>
+
+                    <p>
+                      <strong>Website:</strong>{' '}
+                      {
+                        item.organizations?.website
+                      }
+                    </p>
+
+                    <p>
+                      <strong>Phone:</strong>{' '}
+                      {
+                        item.organizations?.phone
+                      }
+                    </p>
+
+                    <p>
+                      <strong>Email:</strong>{' '}
+                      {
+                        item.organizations?.email
+                      }
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              {results.length === 0 && (
+                <div
+                  style={{
+                    marginTop: '20px',
+                    background: '#ffffff',
+                    border: '1px solid #d8e4ef',
+                    borderRadius: '12px',
+                    padding: '24px'
+                  }}
+                >
+                  <h3
+                    style={{
+                      color: '#12385b',
+                      marginBottom: '12px'
+                    }}
+                  >
+                    Directory Information
+                  </h3>
+
+                  <p
+                    style={{
+                      color: '#48637e',
+                      lineHeight: '1.7'
+                    }}
+                  >
+                    Select a state and click search to display
+                    registered veteran service animal organizations and
+                    support providers.
+                  </p>
+                </div>
+              )}
             </div>
-
           </div>
-
         </div>
-
       </div>
     </main>
   )
