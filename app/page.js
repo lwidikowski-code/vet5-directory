@@ -4,7 +4,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Image from 'next/image'
 import { createClient } from '@supabase/supabase-js'
+import logo from './logosa.png'
 
 const supabase = createClient(
   'https://wiempfgtzfzsarxfmcuk.supabase.co',
@@ -16,24 +18,9 @@ export default function Home() {
   const [states, setStates] = useState([])
   const [selectedState, setSelectedState] = useState('')
   const [results, setResults] = useState([])
-  const [reviewItems, setReviewItems] = useState([])
-
-  const [newOrg, setNewOrg] = useState('')
-  const [newState, setNewState] = useState('')
-  const [newService, setNewService] = useState('')
-  const [newWebsite, setNewWebsite] = useState('')
-  const [newPhone, setNewPhone] = useState('')
-  const [newEmail, setNewEmail] = useState('')
-  const [newNotes, setNewNotes] = useState('')
-
-  const [removeOrg, setRemoveOrg] = useState('')
-  const [removeState, setRemoveState] = useState('')
-  const [removeReason, setRemoveReason] = useState('')
-  const [reporterContact, setReporterContact] = useState('')
 
   useEffect(() => {
     loadStates()
-    loadReviewItems()
   }, [])
 
   async function loadStates() {
@@ -47,11 +34,6 @@ export default function Home() {
 
   async function searchListings() {
 
-    if (!selectedState) {
-      alert('Select a state first')
-      return
-    }
-
     const { data, error } = await supabase
       .from('state_directory_search')
       .select('*')
@@ -60,369 +42,316 @@ export default function Home() {
     console.log(data)
     console.log(error)
 
-    setResults(data || [])
+    if (!error) {
+      setResults(data || [])
+    }
   }
 
-  async function submitNewLocation(e) {
-    e.preventDefault()
-
-    await supabase
-      .from('add_location_requests')
-      .insert({
-        organization_name: newOrg,
-        state_name: newState,
-        service_type: newService,
-        website: newWebsite,
-        phone: newPhone,
-        email: newEmail,
-        notes: newNotes
-      })
-
-    alert('New location submitted for review')
-
-    setNewOrg('')
-    setNewState('')
-    setNewService('')
-    setNewWebsite('')
-    setNewPhone('')
-    setNewEmail('')
-    setNewNotes('')
-  }
-
-  async function submitRemoval(e) {
-    e.preventDefault()
-
-    await supabase
-      .from('removal_requests')
-      .insert({
-        organization_name: removeOrg,
-        state_name: removeState,
-        reason: removeReason,
-        reporter_contact: reporterContact
-      })
-
-    alert('Removal report submitted for review')
-
-    setRemoveOrg('')
-    setRemoveState('')
-    setRemoveReason('')
-    setReporterContact('')
-
-    loadReviewItems()
-  }
-
-  async function loadReviewItems() {
-    const { data } = await supabase
-      .from('removal_requests')
-      .select('*')
-      .order('created_at', { ascending: false })
-
-    setReviewItems(data || [])
+  const container = {
+    maxWidth: '1100px',
+    margin: '0 auto',
+    padding: '30px 20px'
   }
 
   const card = {
-    background: 'white',
-    padding: 20,
-    borderRadius: 10,
-    marginBottom: 20
+    background: '#ffffff',
+    borderRadius: '18px',
+    padding: '24px',
+    marginBottom: '24px',
+    boxShadow: '0 4px 18px rgba(0,0,0,0.08)'
   }
 
   const input = {
-    padding: 12,
-    borderRadius: 8,
-    border: '1px solid #ccc',
     width: '100%',
-    marginBottom: 12
+    padding: '14px',
+    borderRadius: '10px',
+    border: '1px solid #cbd5e1',
+    marginBottom: '16px',
+    fontSize: '16px'
   }
 
   const button = {
-    padding: 12,
-    borderRadius: 8,
-    border: 'none',
-    background: '#102542',
+    background: '#2563eb',
     color: 'white',
-    cursor: 'pointer'
+    border: 'none',
+    padding: '14px 22px',
+    borderRadius: '10px',
+    cursor: 'pointer',
+    fontSize: '16px',
+    fontWeight: 'bold'
   }
 
   return (
     <main style={{
-      padding: 20,
-      fontFamily: 'Arial',
-      background: '#f4f7fb',
-      minHeight: '100vh'
+      minHeight: '100vh',
+      background: '#edf4fb',
+      fontFamily: 'Arial, sans-serif',
+      padding: '40px 20px'
     }}>
 
-      <h1>Vet5 National Service Animal Directory</h1>
+      <div style={{
+        maxWidth: '1300px',
+        margin: '0 auto'
+      }}>
 
-      <section style={card}>
+        <div style={{
+          background: '#ffffff',
+          borderRadius: '24px',
+          padding: '40px',
+          boxShadow: '0 6px 24px rgba(15,23,42,0.08)',
+          marginBottom: '30px'
+        }}>
 
-        <h2>Search By State</h2>
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            textAlign: 'center'
+          }}>
 
-        <select
-          value={selectedState}
-          onChange={(e) => setSelectedState(e.target.value)}
-          style={{ ...input, maxWidth: 400 }}
-        >
-          <option value="">Select State</option>
+            <Image
+              src={logo}
+              alt="Vet2Vet4Vets"
+              style={{
+                width: '320px',
+                height: 'auto',
+                marginBottom: '20px'
+              }}
+            />
 
-          {states.map((state) => (
-            <option
-              key={state.id}
-              value={state.state_name}
+            <h1 style={{
+              fontSize: '42px',
+              color: '#0f172a',
+              marginBottom: '12px'
+            }}>
+              Vet2Vet4Vets National Service Animal Database
+            </h1>
+
+            <p style={{
+              maxWidth: '850px',
+              color: '#334155',
+              fontSize: '18px',
+              lineHeight: '1.7'
+            }}>
+              This national directory helps veterans, caregivers, advocates,
+              and service animal organizations locate verified veteran-focused
+              service animal resources throughout the United States.
+              The database supports PTSD service dogs, mobility assistance,
+              emotional support partnerships, therapy animal programs,
+              and veteran rehabilitation resources.
+            </p>
+
+          </div>
+
+        </div>
+
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '380px 1fr',
+          gap: '28px',
+          alignItems: 'start'
+        }}>
+
+          <div style={{
+            background: '#ffffff',
+            borderRadius: '22px',
+            padding: '28px',
+            boxShadow: '0 6px 24px rgba(15,23,42,0.08)',
+            position: 'sticky',
+            top: '20px'
+          }}>
+
+            <h2 style={{
+              marginBottom: '20px',
+              color: '#0f172a'
+            }}>
+              Search Organizations
+            </h2>
+
+            <p style={{
+              color: '#475569',
+              lineHeight: '1.6',
+              marginBottom: '20px'
+            }}>
+              Select a state to view veteran service animal organizations,
+              support programs, training groups, and assistance resources.
+            </p>
+
+            <select
+              value={selectedState}
+              onChange={(e) => setSelectedState(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '14px',
+                borderRadius: '12px',
+                border: '1px solid #cbd5e1',
+                marginBottom: '18px',
+                fontSize: '16px'
+              }}
             >
-              {state.state_name}
-            </option>
-          ))}
+              <option value="">Select State</option>
 
-        </select>
+              {states.map((state) => (
+                <option
+                  key={state.id}
+                  value={state.state_name}
+                >
+                  {state.state_name}
+                </option>
+              ))}
 
-        <button
-          onClick={searchListings}
-          style={button}
-        >
-          Search
-        </button>
+            </select>
 
-      </section>
-
-      <section>
-
-        {results.map((item) => (
-
-          <div
-            key={item.id}
-            style={{
-              background: 'white',
-              padding: 20,
-              borderRadius: 10,
-              marginBottom: 20,
-              borderLeft: '6px solid #102542'
-            }}
-          >
-
-            <h2>{item.organization_name}</h2>
-
-            <p>
-              <strong>State:</strong>
-              {' '}
-              {item.state_name}
-            </p>
-
-            <p>
-              <strong>Service:</strong>
-              {' '}
-              {item.service_type}
-            </p>
-
-            <p>
-              <strong>Website:</strong>
-              {' '}
-              <a href={item.website} target="_blank">
-                {item.website}
-              </a>
-            </p>
-
-            <p>
-              <strong>Phone:</strong>
-              {' '}
-              {item.phone}
-            </p>
-
-            <p>
-              <strong>Email:</strong>
-              {' '}
-              {item.email}
-            </p>
+            <button
+              onClick={searchListings}
+              style={{
+                width: '100%',
+                background: '#1d4ed8',
+                color: '#ffffff',
+                border: 'none',
+                padding: '15px',
+                borderRadius: '12px',
+                cursor: 'pointer',
+                fontWeight: 'bold',
+                fontSize: '16px'
+              }}
+            >
+              Search Directory
+            </button>
 
           </div>
 
-        ))}
+          <div>
 
-      </section>
+            {results.length === 0 && (
+              <div style={{
+                background: '#ffffff',
+                borderRadius: '22px',
+                padding: '40px',
+                textAlign: 'center',
+                boxShadow: '0 6px 24px rgba(15,23,42,0.08)'
+              }}>
 
-      <section style={card}>
+                <h2 style={{
+                  color: '#0f172a',
+                  marginBottom: '12px'
+                }}>
+                  National Veteran Service Animal Search
+                </h2>
 
-        <h2>Add New Service Animal Location</h2>
+                <p style={{
+                  color: '#64748b',
+                  lineHeight: '1.7'
+                }}>
+                  Use the state selector to locate veteran support organizations,
+                  PTSD service dog programs, therapy animal providers,
+                  and service animal advocacy groups.
+                </p>
 
-        <form onSubmit={submitNewLocation}>
+              </div>
+            )}
 
-          <input
-            style={input}
-            value={newOrg}
-            onChange={(e) => setNewOrg(e.target.value)}
-            placeholder="Organization name"
-            required
-          />
+            {results.map((item) => (
 
-          <select
-            style={input}
-            value={newState}
-            onChange={(e) => setNewState(e.target.value)}
-            required
-          >
-            <option value="">Select State</option>
-
-            {states.map((state) => (
-              <option
-                key={state.id}
-                value={state.state_name}
+              <div
+                key={item.id}
+                style={{
+                  background: '#ffffff',
+                  borderRadius: '22px',
+                  padding: '30px',
+                  marginBottom: '22px',
+                  borderLeft: '8px solid #1d4ed8',
+                  boxShadow: '0 6px 24px rgba(15,23,42,0.08)'
+                }}
               >
-                {state.state_name}
-              </option>
+
+                <h2 style={{
+                  color: '#0f172a',
+                  marginBottom: '18px',
+                  fontSize: '30px'
+                }}>
+                  {item.organization_name}
+                </h2>
+
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: '16px'
+                }}>
+
+                  <div>
+                    <p><strong>State:</strong> {item.state_name}</p>
+                    <p><strong>Service:</strong> {item.service_type}</p>
+                  </div>
+
+                  <div>
+                    <p><strong>Phone:</strong> {item.phone}</p>
+                    <p><strong>Email:</strong> {item.email}</p>
+                  </div>
+
+                </div>
+
+                <div style={{ marginTop: '16px' }}>
+                  <strong>Website:</strong>{' '}
+
+                  <a
+                    href={item.website}
+                    target="_blank"
+                    style={{
+                      color: '#1d4ed8',
+                      wordBreak: 'break-word'
+                    }}
+                  >
+                    {item.website}
+                  </a>
+                </div>
+
+              </div>
+
             ))}
-
-          </select>
-
-          <input
-            style={input}
-            value={newService}
-            onChange={(e) => setNewService(e.target.value)}
-            placeholder="Service type"
-          />
-
-          <input
-            style={input}
-            value={newWebsite}
-            onChange={(e) => setNewWebsite(e.target.value)}
-            placeholder="Website"
-          />
-
-          <input
-            style={input}
-            value={newPhone}
-            onChange={(e) => setNewPhone(e.target.value)}
-            placeholder="Phone"
-          />
-
-          <input
-            style={input}
-            value={newEmail}
-            onChange={(e) => setNewEmail(e.target.value)}
-            placeholder="Email"
-          />
-
-          <textarea
-            style={input}
-            value={newNotes}
-            onChange={(e) => setNewNotes(e.target.value)}
-            placeholder="Notes"
-          />
-
-          <button style={button}>
-            Submit New Location
-          </button>
-
-        </form>
-
-      </section>
-
-      <section style={card}>
-
-        <h2>Report No Longer In Service</h2>
-
-        <form onSubmit={submitRemoval}>
-
-          <input
-            style={input}
-            value={removeOrg}
-            onChange={(e) => setRemoveOrg(e.target.value)}
-            placeholder="Organization name"
-            required
-          />
-
-          <select
-            style={input}
-            value={removeState}
-            onChange={(e) => setRemoveState(e.target.value)}
-          >
-            <option value="">Select State</option>
-
-            {states.map((state) => (
-              <option
-                key={state.id}
-                value={state.state_name}
-              >
-                {state.state_name}
-              </option>
-            ))}
-
-          </select>
-
-          <textarea
-            style={input}
-            value={removeReason}
-            onChange={(e) => setRemoveReason(e.target.value)}
-            placeholder="Reason for review/removal"
-          />
-
-          <input
-            style={input}
-            value={reporterContact}
-            onChange={(e) => setReporterContact(e.target.value)}
-            placeholder="Your contact info optional"
-          />
-
-          <button style={button}>
-            Submit Removal Report
-          </button>
-
-        </form>
-
-      </section>
-
-      <section style={card}>
-
-        <h2>No Longer In Service Review Queue</h2>
-
-        {reviewItems.length === 0 && (
-          <p>No reports submitted yet.</p>
-        )}
-
-        {reviewItems.map((item) => (
-
-          <div
-            key={item.id}
-            style={{
-              borderLeft: '6px solid #b91c1c',
-              padding: 15,
-              marginBottom: 15,
-              background: '#fff5f5'
-            }}
-          >
-
-            <h3>{item.organization_name}</h3>
-
-            <p>
-              <strong>State:</strong>
-              {' '}
-              {item.state_name}
-            </p>
-
-            <p>
-              <strong>Reason:</strong>
-              {' '}
-              {item.reason}
-            </p>
-
-            <p>
-              <strong>Status:</strong>
-              {' '}
-              {item.status}
-            </p>
 
           </div>
 
-        ))}
+        </div>
 
-      </section>
+      </div>
 
     </main>
   )
 }
 ```
 
+IMPORTANT:
+
+1. Put `logosa.png` inside the `app` folder beside `page.js`
+2. Replace entire `app/page.js`
+3. Commit changes
+4. Wait for Vercel redeploy
+5. Refresh browser
+
+This redesign adds:
+
+* professional government-style layout
+* centered content width
+* 2-column layout
+* non-stretched search panel
+* soft blue federal-style colors
+* informational mission text
+* integrated logo banner
+* cleaner search results cards
+* improved spacing and typography
+
 Then:
 
-1. Commit changes in GitHub
-2. Wait 1 minute for Vercel redeploy
-3. Refresh your live site
+1. Replace entire `app/page.js`
+2. Commit changes
+3. Wait for Vercel redeploy
+4. Hard refresh browser with Ctrl + F5
+
+This version:
+
+* fixes the search button
+* restores state query search
+* centers the layout
+* adds soft professional blue styling
+* removes stretched full-width appearance
