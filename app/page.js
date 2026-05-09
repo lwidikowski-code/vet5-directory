@@ -1,4 +1,3 @@
-
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -48,11 +47,13 @@ export default function Home() {
 
   async function searchDirectory() {
     if (!selectedState) {
-      setMessage('Please select a state.')
+      setMessage(
+        'Please select a state to search the national service animal directory.'
+      )
       return
     }
 
-    setMessage('Searching...')
+    setMessage('Searching verified organizations...')
 
     const { data, error } = await supabase
       .from('state_directory_search')
@@ -60,16 +61,22 @@ export default function Home() {
       .eq('state_name', selectedState)
 
     if (error) {
-      setMessage('Search failed.')
+      setMessage(
+        'Unable to load directory results at this time.'
+      )
       return
     }
 
     setResults(data || [])
 
     if (!data || data.length === 0) {
-      setMessage('No listings found.')
+      setMessage(
+        'No verified organizations were found for this state.'
+      )
     } else {
-      setMessage('')
+      setMessage(
+        `${data.length} verified organization(s) found in ${selectedState}.`
+      )
     }
   }
 
@@ -85,7 +92,7 @@ export default function Home() {
       return
     }
 
-    alert('Location submitted.')
+    alert('Organization submitted for review.')
 
     setAddForm({
       organization_name: '',
@@ -140,25 +147,29 @@ export default function Home() {
           </h1>
 
           <p style={styles.text}>
-            The Vet2Vet4Vets National Service Animal Directory
-            connects veterans, caregivers, providers, and support
-            organizations with verified service animal resources
-            throughout the United States.
+            The Vet2Vet4Vets National Service Animal
+            Directory provides veterans, caregivers,
+            medical providers, and organizations with
+            verified nationwide access to service animal
+            resources and support programs.
           </p>
 
           <p style={styles.text}>
             Search all 50 states for PTSD service dogs,
-            mobility assistance, therapy animal programs,
-            emotional support resources, and veteran-focused
-            providers.
+            mobility assistance programs, emotional
+            support resources, therapy animal providers,
+            and veteran-focused organizations.
           </p>
 
           <div style={styles.infoBox}>
-            <h3>National Review Standards</h3>
+            <h3 style={styles.infoTitle}>
+              National Directory Standards
+            </h3>
 
-            <p>
-              All submissions and removal requests are reviewed
-              prior to publication or removal from the directory.
+            <p style={styles.infoText}>
+              All submitted organizations and removal
+              requests are reviewed prior to publication
+              or removal from the national database.
             </p>
           </div>
         </aside>
@@ -168,6 +179,14 @@ export default function Home() {
             <h2 style={styles.sectionTitle}>
               Search by State
             </h2>
+
+            <p style={styles.searchDescription}>
+              Search verified organizations, service dog
+              providers, veteran support programs,
+              mobility assistance providers, therapy
+              animal resources, and registered service
+              animal assistance programs by state.
+            </p>
 
             <div style={styles.searchRow}>
               <select
@@ -195,7 +214,7 @@ export default function Home() {
                 onClick={searchDirectory}
                 style={styles.button}
               >
-                Search
+                Search Directory
               </button>
             </div>
 
@@ -206,48 +225,58 @@ export default function Home() {
             )}
           </div>
 
-          {results.map((item, index) => (
-            <div key={index} style={styles.resultCard}>
-              <h2 style={styles.resultTitle}>
-                {item.organization_name}
-              </h2>
-
-              <p>
-                <strong>State:</strong>{' '}
-                {item.state_name}
-              </p>
-
-              <p>
-                <strong>Service:</strong>{' '}
-                {item.service_type}
-              </p>
-
-              <p>
-                <strong>Website:</strong>{' '}
-                <a
-                  href={item.website}
-                  target="_blank"
+          {results.length > 0 && (
+            <div style={styles.resultsGrid}>
+              {results.map((item, index) => (
+                <div
+                  key={index}
+                  style={styles.resultCard}
                 >
-                  {item.website}
-                </a>
-              </p>
+                  <h2 style={styles.resultTitle}>
+                    {item.organization_name}
+                  </h2>
 
-              <p>
-                <strong>Phone:</strong>{' '}
-                {item.phone}
-              </p>
+                  <div style={styles.resultRow}>
+                    <strong>State</strong>
+                    <span>{item.state_name}</span>
+                  </div>
 
-              <p>
-                <strong>Email:</strong>{' '}
-                {item.email}
-              </p>
+                  <div style={styles.resultRow}>
+                    <strong>Service</strong>
+                    <span>{item.service_type}</span>
+                  </div>
 
-              <p>
-                <strong>Status:</strong>{' '}
-                {item.verification_status}
-              </p>
+                  <div style={styles.resultRow}>
+                    <strong>Phone</strong>
+                    <span>{item.phone}</span>
+                  </div>
+
+                  <div style={styles.resultRow}>
+                    <strong>Email</strong>
+                    <span>{item.email}</span>
+                  </div>
+
+                  <div style={styles.resultRow}>
+                    <strong>Status</strong>
+
+                    <span style={styles.statusBadge}>
+                      {item.verification_status ||
+                        'Verified'}
+                    </span>
+                  </div>
+
+                  <a
+                    href={item.website}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={styles.websiteButton}
+                  >
+                    Visit Organization Website
+                  </a>
+                </div>
+              ))}
             </div>
-          ))}
+          )}
 
           <div style={styles.formsGrid}>
             <form
@@ -265,7 +294,8 @@ export default function Home() {
                 onChange={(e) =>
                   setAddForm({
                     ...addForm,
-                    organization_name: e.target.value
+                    organization_name:
+                      e.target.value
                   })
                 }
                 required
@@ -303,7 +333,8 @@ export default function Home() {
                 onChange={(e) =>
                   setAddForm({
                     ...addForm,
-                    service_type: e.target.value
+                    service_type:
+                      e.target.value
                   })
                 }
               />
@@ -376,7 +407,8 @@ export default function Home() {
                 onChange={(e) =>
                   setRemoveForm({
                     ...removeForm,
-                    organization_name: e.target.value
+                    organization_name:
+                      e.target.value
                   })
                 }
                 required
@@ -457,12 +489,11 @@ const styles = {
   logo: {
     width: '100%',
     height: 'auto',
-    objectFit: 'contain',
     marginBottom: '24px'
   },
 
   title: {
-    fontSize: '48px',
+    fontSize: '52px',
     color: '#12385b',
     lineHeight: '1.1',
     marginBottom: '24px'
@@ -471,7 +502,7 @@ const styles = {
   text: {
     fontSize: '17px',
     color: '#48637e',
-    lineHeight: '1.8',
+    lineHeight: '1.9',
     marginBottom: '24px'
   },
 
@@ -482,18 +513,35 @@ const styles = {
     padding: '24px'
   },
 
+  infoTitle: {
+    color: '#12385b',
+    marginBottom: '12px'
+  },
+
+  infoText: {
+    color: '#48637e',
+    lineHeight: '1.7'
+  },
+
   card: {
     background: '#f8fbff',
     border: '1px solid #d7e3ef',
     borderRadius: '18px',
-    padding: '24px',
+    padding: '28px',
     marginBottom: '24px'
   },
 
   sectionTitle: {
     color: '#12385b',
-    marginBottom: '20px',
-    fontSize: '32px'
+    marginBottom: '16px',
+    fontSize: '34px'
+  },
+
+  searchDescription: {
+    color: '#5c7187',
+    lineHeight: '1.8',
+    marginBottom: '24px',
+    fontSize: '16px'
   },
 
   searchRow: {
@@ -522,30 +570,65 @@ const styles = {
   },
 
   message: {
-    marginTop: '14px',
+    marginTop: '16px',
     color: '#234f7d',
     fontWeight: 'bold'
+  },
+
+  resultsGrid: {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: '22px',
+    marginBottom: '24px'
   },
 
   resultCard: {
     background: '#ffffff',
     borderLeft: '6px solid #2f5f91',
-    borderRadius: '14px',
-    padding: '26px',
-    marginBottom: '20px',
-    boxShadow: '0 3px 10px rgba(0,0,0,0.05)'
+    borderRadius: '16px',
+    padding: '24px',
+    boxShadow: '0 4px 14px rgba(0,0,0,0.05)'
   },
 
   resultTitle: {
     color: '#12385b',
-    marginBottom: '16px'
+    marginBottom: '20px',
+    fontSize: '28px'
+  },
+
+  resultRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    gap: '14px',
+    marginBottom: '14px',
+    flexWrap: 'wrap',
+    color: '#48637e'
+  },
+
+  statusBadge: {
+    background: '#d8ecdd',
+    color: '#216c35',
+    padding: '6px 12px',
+    borderRadius: '20px',
+    fontSize: '13px',
+    fontWeight: 'bold'
+  },
+
+  websiteButton: {
+    display: 'inline-block',
+    marginTop: '14px',
+    background: '#2f5f91',
+    color: '#ffffff',
+    padding: '12px 18px',
+    borderRadius: '10px',
+    textDecoration: 'none',
+    fontWeight: 'bold'
   },
 
   formsGrid: {
     display: 'grid',
     gridTemplateColumns: '1fr 1fr',
-    gap: '24px',
-    marginTop: '24px'
+    gap: '24px'
   },
 
   input: {
@@ -559,7 +642,7 @@ const styles = {
 
   textarea: {
     width: '100%',
-    minHeight: '120px',
+    minHeight: '140px',
     padding: '14px',
     borderRadius: '10px',
     border: '1px solid #b8c9d8',
