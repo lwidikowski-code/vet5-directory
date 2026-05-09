@@ -13,13 +13,11 @@ const supabase = createClient(
 export default function Home() {
   const [states, setStates] = useState([])
   const [selectedState, setSelectedState] = useState('')
-  const [organizations, setOrganizations] = useState([])
   const [results, setResults] = useState([])
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     loadStates()
-    loadOrganizations()
   }, [])
 
   async function loadStates() {
@@ -28,15 +26,9 @@ export default function Home() {
       .select('*')
       .order('state_name')
 
-    if (data) setStates(data)
-  }
-
-  async function loadOrganizations() {
-    const { data } = await supabase
-      .from('organizations')
-      .select('*')
-
-    if (data) setOrganizations(data)
+    if (data) {
+      setStates(data)
+    }
   }
 
   async function handleSearch() {
@@ -70,11 +62,10 @@ export default function Home() {
   return (
     <main
       style={{
+        background: '#eaf2fb',
         minHeight: '100vh',
-        background: '#edf4fb',
         padding: '40px 20px',
-        fontFamily: 'Arial, sans-serif',
-        color: '#16324f'
+        fontFamily: 'Arial, sans-serif'
       }}
     >
       <div
@@ -86,19 +77,19 @@ export default function Home() {
         <div
           style={{
             background: '#ffffff',
-            borderRadius: '18px',
+            borderRadius: '20px',
             padding: '40px',
-            boxShadow: '0 6px 18px rgba(0,0,0,0.08)'
+            boxShadow: '0 8px 24px rgba(0,0,0,0.08)'
           }}
         >
           <div
             style={{
               display: 'grid',
               gridTemplateColumns: '420px 1fr',
-              gap: '40px',
-              alignItems: 'start'
+              gap: '40px'
             }}
           >
+            {/* LEFT COLUMN */}
             <div>
               <Image
                 src={logo}
@@ -112,9 +103,9 @@ export default function Home() {
 
               <h1
                 style={{
-                  fontSize: '36px',
-                  marginBottom: '20px',
-                  color: '#12365a'
+                  fontSize: '34px',
+                  color: '#12385b',
+                  marginBottom: '20px'
                 }}
               >
                 National Service Animal Directory
@@ -122,66 +113,68 @@ export default function Home() {
 
               <p
                 style={{
-                  lineHeight: '1.7',
-                  fontSize: '17px',
+                  lineHeight: '1.8',
                   color: '#35516d',
+                  fontSize: '16px',
                   marginBottom: '20px'
                 }}
               >
                 The Vet2Vet4Vets National Service Animal Directory
-                provides veterans, organizations, and families with
-                verified information regarding service animal programs,
-                assistance resources, and active support organizations
-                across all 50 states.
+                helps veterans, caregivers, organizations, and support
+                teams locate verified service animal providers and
+                veteran support resources across the United States.
               </p>
 
               <p
                 style={{
-                  lineHeight: '1.7',
-                  fontSize: '16px',
-                  color: '#48637e'
+                  lineHeight: '1.8',
+                  color: '#35516d',
+                  fontSize: '16px'
                 }}
               >
-                This directory also allows organizations to report
-                inactive services, request updates, and maintain
-                accurate records for veteran support programs.
+                This national database is designed to improve
+                accessibility, transparency, and support coordination
+                for veterans and service animal programs.
               </p>
 
               <div
                 style={{
                   marginTop: '30px',
-                  padding: '20px',
-                  background: '#f3f8fd',
-                  borderRadius: '12px',
-                  border: '1px solid #d5e4f3'
+                  background: '#f4f8fc',
+                  padding: '22px',
+                  borderRadius: '14px',
+                  border: '1px solid #d4e2ef'
                 }}
               >
                 <h3
                   style={{
-                    marginBottom: '12px'
+                    color: '#12385b',
+                    marginBottom: '10px'
                   }}
                 >
-                  Report No Longer In Service
+                  Report Inactive Services
                 </h3>
 
                 <p
                   style={{
-                    fontSize: '15px',
-                    lineHeight: '1.6'
+                    color: '#4c6882',
+                    lineHeight: '1.7',
+                    fontSize: '15px'
                   }}
                 >
-                  If an organization is no longer active or
-                  information is outdated, please submit a review
-                  request through the administrative support system.
+                  Organizations no longer operating or containing
+                  outdated information may be reported for review and
+                  verification.
                 </p>
               </div>
             </div>
 
+            {/* RIGHT COLUMN */}
             <div>
               <div
                 style={{
                   background: '#f8fbff',
-                  border: '1px solid #d9e6f2',
+                  border: '1px solid #d8e4ef',
                   borderRadius: '16px',
                   padding: '28px',
                   marginBottom: '30px'
@@ -189,11 +182,11 @@ export default function Home() {
               >
                 <h2
                   style={{
-                    marginBottom: '20px',
-                    color: '#12365a'
+                    color: '#12385b',
+                    marginBottom: '20px'
                   }}
                 >
-                  Search By State
+                  Search by State
                 </h2>
 
                 <div
@@ -210,12 +203,12 @@ export default function Home() {
                       setSelectedState(e.target.value)
                     }
                     style={{
-                      padding: '14px',
                       width: '320px',
+                      padding: '14px',
                       borderRadius: '10px',
-                      border: '1px solid #b8cadb',
+                      border: '1px solid #b7cadb',
                       fontSize: '16px',
-                      background: '#fff'
+                      background: '#ffffff'
                     }}
                   >
                     <option value="">
@@ -235,11 +228,11 @@ export default function Home() {
                   <button
                     onClick={handleSearch}
                     style={{
-                      padding: '14px 26px',
                       background: '#2f5f91',
-                      color: '#fff',
+                      color: '#ffffff',
                       border: 'none',
                       borderRadius: '10px',
+                      padding: '14px 28px',
                       cursor: 'pointer',
                       fontWeight: 'bold',
                       fontSize: '15px'
@@ -251,7 +244,13 @@ export default function Home() {
               </div>
 
               {loading && (
-                <p>Loading organizations...</p>
+                <p
+                  style={{
+                    color: '#12385b'
+                  }}
+                >
+                  Loading organizations...
+                </p>
               )}
 
               <div
@@ -274,8 +273,8 @@ export default function Home() {
                   >
                     <h2
                       style={{
-                        marginBottom: '18px',
-                        color: '#16324f'
+                        color: '#12385b',
+                        marginBottom: '18px'
                       }}
                     >
                       {
@@ -325,66 +324,53 @@ export default function Home() {
                       }
                     </p>
 
-                    <div
+                    <button
                       style={{
-                        marginTop: '18px'
+                        marginTop: '18px',
+                        padding: '10px 18px',
+                        borderRadius: '8px',
+                        border: '1px solid #b8cadb',
+                        background: '#e7f0f8',
+                        cursor: 'pointer'
                       }}
                     >
-                      <button
-                        style={{
-                          padding:
-                            '10px 18px',
-                          background:
-                            '#d9e6f2',
-                          border:
-                            '1px solid #b5c7da',
-                          borderRadius:
-                            '8px',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        Report Organization
-                      </button>
-                    </div>
+                      Report Organization
+                    </button>
                   </div>
                 ))}
               </div>
 
-              {!loading &&
-                results.length === 0 && (
-                  <div
+              {!loading && results.length === 0 && (
+                <div
+                  style={{
+                    background: '#ffffff',
+                    borderRadius: '14px',
+                    padding: '28px',
+                    border: '1px solid #d8e4ef',
+                    marginTop: '20px'
+                  }}
+                >
+                  <h3
                     style={{
-                      marginTop: '30px',
-                      background: '#ffffff',
-                      padding: '30px',
-                      borderRadius: '14px',
-                      border:
-                        '1px solid #d9e6f2'
+                      color: '#12385b',
+                      marginBottom: '12px'
                     }}
                   >
-                    <h3
-                      style={{
-                        marginBottom: '12px'
-                      }}
-                    >
-                      Directory Information
-                    </h3>
+                    Directory Information
+                  </h3>
 
-                    <p
-                      style={{
-                        lineHeight: '1.7'
-                      }}
-                    >
-                      Select a state and
-                      click search to view
-                      registered service
-                      animal organizations,
-                      veteran assistance
-                      programs, and support
-                      providers.
-                    </p>
-                  </div>
-                )}
+                  <p
+                    style={{
+                      lineHeight: '1.7',
+                      color: '#48637e'
+                    }}
+                  >
+                    Select a state and click search to display verified
+                    service animal organizations and veteran support
+                    providers.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>
