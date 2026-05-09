@@ -6,19 +6,19 @@ import { createClient } from '@supabase/supabase-js'
 import logo from './logosa.png'
 
 const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  'https://wiempfgtzfzsarxfmcuk.supabase.co',
+  'sb_publishable_9guS4mEVmNrA1FHmSLlOoA_Ck7hm7hg'
 )
 
 export default function Home() {
   const [states, setStates] = useState([])
   const [selectedState, setSelectedState] = useState('')
   const [results, setResults] = useState([])
-  const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
 
-  const [newLocation, setNewLocation] = useState({
+  const [addForm, setAddForm] = useState({
     organization_name: '',
+    state_name: '',
     service_type: '',
     website: '',
     phone: '',
@@ -26,8 +26,9 @@ export default function Home() {
     notes: ''
   })
 
-  const [reportData, setReportData] = useState({
+  const [removeForm, setRemoveForm] = useState({
     organization_name: '',
+    state_name: '',
     reason: ''
   })
 
@@ -36,86 +37,52 @@ export default function Home() {
   }, [])
 
   async function loadStates() {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('states')
       .select('*')
       .order('state_name')
 
-    if (!error) {
-      setStates(data)
-    }
+    setStates(data || [])
   }
 
-  async function searchOrganizations() {
+  async function searchDirectory() {
     if (!selectedState) {
       setMessage('Please select a state.')
       return
     }
 
-    setLoading(true)
-    setMessage('')
+    setMessage('Searching...')
 
     const { data, error } = await supabase
-      .from('service_listings')
-      .select(`
-        id,
-        service_type,
-        notes,
-        organizations (
-          organization_name,
-          website,
-          phone,
-          email
-        ),
-        states (
-          state_name
-        )
-      `)
-      .eq('state_id', selectedState)
+      .from('state_directory_search')
+      .select('*')
+      .eq('state_name', selectedState)
 
     if (error) {
-      setMessage('Search failed.')
-      setLoading(false)
+      setMessage('Search error. Check Supabase view permissions.')
       return
     }
 
     setResults(data || [])
-    setLoading(false)
-
-    if (data.length === 0) {
-      setMessage('No listings found for this state.')
-    }
+    setMessage(data?.length ? '' : 'No listings found for this state.')
   }
 
-  async function submitNewLocation(e) {
+  async function submitAdd(e) {
     e.preventDefault()
-
-    const stateObj = states.find(
-      (s) => String(s.id) === String(selectedState)
-    )
 
     const { error } = await supabase
       .from('add_location_requests')
-      .insert({
-        organization_name: newLocation.organization_name,
-        state_name: stateObj?.state_name || '',
-        service_type: newLocation.service_type,
-        website: newLocation.website,
-        phone: newLocation.phone,
-        email: newLocation.email,
-        notes: newLocation.notes,
-        status: 'Pending Review'
-      })
+      .insert(addForm)
 
     if (error) {
-      alert('Submission failed.')
+      alert('Add request failed.')
       return
     }
 
-    alert('Location submitted successfully.')
-
-    setNewLocation({
+    alert('New location submitted for review.')
+    setAddForm({
       organization_name: '',
+      state_name: '',
       service_type: '',
       website: '',
       phone: '',
@@ -124,337 +91,139 @@ export default function Home() {
     })
   }
 
-  async function submitRemovalRequest(e) {
+  async function submitRemoval(e) {
     e.preventDefault()
-
-    const stateObj = states.find(
-      (s) => String(s.id) === String(selectedState)
-    )
 
     const { error } = await supabase
       .from('removal_requests')
       .insert({
-        organization_name: reportData.organization_name,
-        state_name: stateObj?.state_name || '',
-        reason: reportData.reason,
+        organization_name: removeForm.organization_name,
+        state_name: removeForm.state_name,
+        reason: removeForm.reason,
         status: 'Pending Review'
       })
 
     if (error) {
-      alert('Report failed.')
+      alert('Removal report failed.')
       return
     }
 
-    alert('Report submitted.')
-
-    setReportData({
+    alert('No longer in service report submitted.')
+    setRemoveForm({
       organization_name: '',
+      state_name: '',
       reason: ''
     })
   }
 
   return (
     <main style={styles.page}>
-      <div style={styles.container}>
-        {/* LEFT COLUMN */}
-        <section style={styles.leftColumn}>
-          <div style={styles.logoWrap}>
-            <Image
-              src={logo}
-              alt="Vet2Vet4Vets"
-              style={styles.logo}
-              priority
-            />
-          </div>
+      <div style={styles.wrap}>
+        <aside style={styles.left}>
+          <Image src={logo} alt="Vet2Vet4Vets" style={styles.logo} />
 
-          <h1 style={styles.title}>
-            National Service Animal Directory
-          </h1>
+          <h1 style={styles.title}>National Service Animal Directory</h1>
 
-          <p style={styles.paragraph}>
-            The Vet2Vet4Vets National Service Animal Directory
-            provides veterans, caregivers, providers, and
-            organizations with verified nationwide access to
-            service animal support resources.
+          <p style={styles.text}>
+            The Vet2Vet4Vets National Service Animal Directory helps veterans,
+            families, caregivers, and support organizations locate service animal
+            resources across all 50 states.
           </p>
 
-          <p style={styles.paragraph}>
-            Search state-by-state listings for PTSD service dogs,
-            mobility support, therapy assistance programs,
-            veteran-focused providers, and registered support
-            organizations.
+          <p style={styles.text}>
+            Search by state for PTSD service dogs, mobility assistance,
+            medical alert programs, therapy animal support, and veteran-focused
+            service animal providers.
           </p>
 
-          <div style={styles.infoBox}>
-            <h3 style={styles.infoTitle}>
-              Directory Standards
-            </h3>
-
-            <p style={styles.infoText}>
-              This directory is maintained to support accurate,
-              transparent, accessible, and reviewable veteran
-              assistance information nationwide.
+          <div style={styles.notice}>
+            <strong>Review System</strong>
+            <p>
+              Users may submit new organizations or report providers that are no
+              longer in service. All reports are stored for review.
             </p>
           </div>
+        </aside>
 
-          <div style={styles.infoBox}>
-            <h3 style={styles.infoTitle}>
-              Submission Review
-            </h3>
-
-            <p style={styles.infoText}>
-              All new listings and removal reports are reviewed
-              before publication or removal from the national
-              directory database.
-            </p>
-          </div>
-        </section>
-
-        {/* RIGHT COLUMN */}
-        <section style={styles.rightColumn}>
-          {/* SEARCH */}
+        <section style={styles.right}>
           <div style={styles.card}>
-            <h2 style={styles.sectionTitle}>
-              Search by State
-            </h2>
+            <h2>Search by State</h2>
 
-            <div style={styles.searchRow}>
+            <div style={styles.row}>
               <select
                 value={selectedState}
-                onChange={(e) =>
-                  setSelectedState(e.target.value)
-                }
+                onChange={(e) => setSelectedState(e.target.value)}
                 style={styles.select}
               >
-                <option value="">
-                  Select State
-                </option>
-
+                <option value="">Select State</option>
                 {states.map((state) => (
-                  <option
-                    key={state.id}
-                    value={state.id}
-                  >
+                  <option key={state.id} value={state.state_name}>
                     {state.state_name}
                   </option>
                 ))}
               </select>
 
-              <button
-                onClick={searchOrganizations}
-                style={styles.button}
-              >
+              <button onClick={searchDirectory} style={styles.button}>
                 Search
               </button>
             </div>
 
-            {message && (
-              <div style={styles.message}>
-                {message}
-              </div>
-            )}
+            {message && <p style={styles.message}>{message}</p>}
           </div>
 
-          {/* RESULTS */}
-          <div style={styles.resultsArea}>
-            {loading && (
-              <div style={styles.card}>
-                Loading listings...
-              </div>
-            )}
+          {results.map((item) => (
+            <div key={item.id} style={styles.result}>
+              <h2>{item.organization_name}</h2>
+              <p><strong>State:</strong> {item.state_name}</p>
+              <p><strong>Service:</strong> {item.service_type}</p>
+              <p><strong>Website:</strong> <a href={item.website} target="_blank">{item.website}</a></p>
+              <p><strong>Phone:</strong> {item.phone}</p>
+              <p><strong>Email:</strong> {item.email}</p>
+              <p><strong>Status:</strong> {item.verification_status}</p>
+            </div>
+          ))}
 
-            {!loading &&
-              results.map((item) => (
-                <div
-                  key={item.id}
-                  style={styles.resultCard}
-                >
-                  <h2 style={styles.resultTitle}>
-                    {
-                      item.organizations
-                        ?.organization_name
-                    }
-                  </h2>
+          <div style={styles.forms}>
+            <form onSubmit={submitAdd} style={styles.card}>
+              <h2>Add New Location</h2>
 
-                  <p>
-                    <strong>State:</strong>{' '}
-                    {item.states?.state_name}
-                  </p>
+              <input style={styles.input} placeholder="Organization Name" value={addForm.organization_name} onChange={(e) => setAddForm({ ...addForm, organization_name: e.target.value })} required />
 
-                  <p>
-                    <strong>Service:</strong>{' '}
-                    {item.service_type}
-                  </p>
+              <select style={styles.input} value={addForm.state_name} onChange={(e) => setAddForm({ ...addForm, state_name: e.target.value })} required>
+                <option value="">Select State</option>
+                {states.map((state) => (
+                  <option key={state.id} value={state.state_name}>
+                    {state.state_name}
+                  </option>
+                ))}
+              </select>
 
-                  <p>
-                    <strong>Website:</strong>{' '}
-                    <a
-                      href={
-                        item.organizations?.website
-                      }
-                      target="_blank"
-                    >
-                      {
-                        item.organizations
-                          ?.website
-                      }
-                    </a>
-                  </p>
+              <input style={styles.input} placeholder="Service Type" value={addForm.service_type} onChange={(e) => setAddForm({ ...addForm, service_type: e.target.value })} />
+              <input style={styles.input} placeholder="Website" value={addForm.website} onChange={(e) => setAddForm({ ...addForm, website: e.target.value })} />
+              <input style={styles.input} placeholder="Phone" value={addForm.phone} onChange={(e) => setAddForm({ ...addForm, phone: e.target.value })} />
+              <input style={styles.input} placeholder="Email" value={addForm.email} onChange={(e) => setAddForm({ ...addForm, email: e.target.value })} />
+              <textarea style={styles.textarea} placeholder="Notes" value={addForm.notes} onChange={(e) => setAddForm({ ...addForm, notes: e.target.value })} />
 
-                  <p>
-                    <strong>Phone:</strong>{' '}
-                    {item.organizations?.phone}
-                  </p>
-
-                  <p>
-                    <strong>Email:</strong>{' '}
-                    {item.organizations?.email}
-                  </p>
-
-                  {item.notes && (
-                    <p>
-                      <strong>Notes:</strong>{' '}
-                      {item.notes}
-                    </p>
-                  )}
-                </div>
-              ))}
-          </div>
-
-          {/* FORMS */}
-          <div style={styles.formGrid}>
-            {/* ADD LOCATION */}
-            <form
-              onSubmit={submitNewLocation}
-              style={styles.card}
-            >
-              <h2 style={styles.sectionTitle}>
-                Add New Organization
-              </h2>
-
-              <input
-                style={styles.input}
-                placeholder="Organization Name"
-                value={
-                  newLocation.organization_name
-                }
-                onChange={(e) =>
-                  setNewLocation({
-                    ...newLocation,
-                    organization_name:
-                      e.target.value
-                  })
-                }
-                required
-              />
-
-              <input
-                style={styles.input}
-                placeholder="Service Type"
-                value={newLocation.service_type}
-                onChange={(e) =>
-                  setNewLocation({
-                    ...newLocation,
-                    service_type:
-                      e.target.value
-                  })
-                }
-              />
-
-              <input
-                style={styles.input}
-                placeholder="Website"
-                value={newLocation.website}
-                onChange={(e) =>
-                  setNewLocation({
-                    ...newLocation,
-                    website: e.target.value
-                  })
-                }
-              />
-
-              <input
-                style={styles.input}
-                placeholder="Phone"
-                value={newLocation.phone}
-                onChange={(e) =>
-                  setNewLocation({
-                    ...newLocation,
-                    phone: e.target.value
-                  })
-                }
-              />
-
-              <input
-                style={styles.input}
-                placeholder="Email"
-                value={newLocation.email}
-                onChange={(e) =>
-                  setNewLocation({
-                    ...newLocation,
-                    email: e.target.value
-                  })
-                }
-              />
-
-              <textarea
-                style={styles.textarea}
-                placeholder="Notes"
-                value={newLocation.notes}
-                onChange={(e) =>
-                  setNewLocation({
-                    ...newLocation,
-                    notes: e.target.value
-                  })
-                }
-              />
-
-              <button style={styles.button}>
-                Submit for Review
-              </button>
+              <button style={styles.button}>Submit for Review</button>
             </form>
 
-            {/* REPORT REMOVAL */}
-            <form
-              onSubmit={submitRemovalRequest}
-              style={styles.card}
-            >
-              <h2 style={styles.sectionTitle}>
-                Report No Longer In Service
-              </h2>
+            <form onSubmit={submitRemoval} style={styles.card}>
+              <h2>Report No Longer In Service</h2>
 
-              <input
-                style={styles.input}
-                placeholder="Organization Name"
-                value={
-                  reportData.organization_name
-                }
-                onChange={(e) =>
-                  setReportData({
-                    ...reportData,
-                    organization_name:
-                      e.target.value
-                  })
-                }
-                required
-              />
+              <input style={styles.input} placeholder="Organization Name" value={removeForm.organization_name} onChange={(e) => setRemoveForm({ ...removeForm, organization_name: e.target.value })} required />
 
-              <textarea
-                style={styles.textarea}
-                placeholder="Reason For Review"
-                value={reportData.reason}
-                onChange={(e) =>
-                  setReportData({
-                    ...reportData,
-                    reason: e.target.value
-                  })
-                }
-                required
-              />
+              <select style={styles.input} value={removeForm.state_name} onChange={(e) => setRemoveForm({ ...removeForm, state_name: e.target.value })}>
+                <option value="">Select State</option>
+                {states.map((state) => (
+                  <option key={state.id} value={state.state_name}>
+                    {state.state_name}
+                  </option>
+                ))}
+              </select>
 
-              <button style={styles.button}>
-                Submit Review Request
-              </button>
+              <textarea style={styles.textarea} placeholder="Reason for review/removal" value={removeForm.reason} onChange={(e) => setRemoveForm({ ...removeForm, reason: e.target.value })} required />
+
+              <button style={styles.button}>Submit Report</button>
             </form>
           </div>
         </section>
@@ -468,157 +237,107 @@ const styles = {
     minHeight: '100vh',
     background: '#eaf2fb',
     padding: '40px 20px',
-    fontFamily: 'Arial, sans-serif'
+    fontFamily: 'Arial, sans-serif',
+    color: '#17324d'
   },
-
-  container: {
-    maxWidth: '1500px',
+  wrap: {
+    maxWidth: '1450px',
     margin: '0 auto',
-    background: '#ffffff',
-    borderRadius: '24px',
-    padding: '40px',
-    boxShadow: '0 8px 28px rgba(0,0,0,0.08)',
     display: 'grid',
-    gridTemplateColumns: '420px 1fr',
-    gap: '40px'
+    gridTemplateColumns: '410px 1fr',
+    gap: '34px',
+    background: '#ffffff',
+    padding: '38px',
+    borderRadius: '24px',
+    boxShadow: '0 8px 28px rgba(0,0,0,.08)'
   },
-
-  leftColumn: {},
-
-  rightColumn: {},
-
-  logoWrap: {
-    width: '100%',
-    textAlign: 'center',
-    marginBottom: '20px'
-  },
-
+  left: {},
+  right: {},
   logo: {
     width: '100%',
     height: 'auto',
-    objectFit: 'contain'
+    marginBottom: '24px'
   },
-
   title: {
-    fontSize: '52px',
     color: '#12385b',
+    fontSize: '42px',
     lineHeight: '1.1',
-    marginBottom: '24px'
-  },
-
-  paragraph: {
-    fontSize: '17px',
-    color: '#48637e',
-    lineHeight: '1.9',
-    marginBottom: '24px'
-  },
-
-  infoBox: {
-    background: '#f5f9fd',
-    border: '1px solid #d7e3ef',
-    borderRadius: '16px',
-    padding: '22px',
     marginBottom: '20px'
   },
-
-  infoTitle: {
-    color: '#12385b',
-    marginBottom: '12px'
+  text: {
+    color: '#48637e',
+    fontSize: '16px',
+    lineHeight: '1.8'
   },
-
-  infoText: {
-    color: '#4b647d',
-    lineHeight: '1.7'
+  notice: {
+    marginTop: '24px',
+    background: '#f5f9fd',
+    border: '1px solid #d8e4ef',
+    borderRadius: '14px',
+    padding: '20px'
   },
-
   card: {
     background: '#f8fbff',
-    border: '1px solid #d7e3ef',
-    borderRadius: '18px',
+    border: '1px solid #d8e4ef',
+    borderRadius: '16px',
     padding: '24px',
     marginBottom: '24px'
   },
-
-  sectionTitle: {
-    color: '#12385b',
-    marginBottom: '20px',
-    fontSize: '32px'
-  },
-
-  searchRow: {
+  row: {
     display: 'flex',
-    gap: '14px',
+    gap: '12px',
     flexWrap: 'wrap'
   },
-
   select: {
     width: '320px',
     padding: '14px',
-    borderRadius: '10px',
-    border: '1px solid #b8c9d8',
-    fontSize: '16px',
-    background: '#ffffff'
+    borderRadius: '8px',
+    border: '1px solid #b7cadb',
+    fontSize: '16px'
   },
-
+  input: {
+    width: '100%',
+    padding: '13px',
+    borderRadius: '8px',
+    border: '1px solid #b7cadb',
+    marginBottom: '12px',
+    fontSize: '15px'
+  },
+  textarea: {
+    width: '100%',
+    minHeight: '110px',
+    padding: '13px',
+    borderRadius: '8px',
+    border: '1px solid #b7cadb',
+    marginBottom: '12px',
+    fontSize: '15px'
+  },
   button: {
     background: '#2f5f91',
     color: '#ffffff',
     border: 'none',
-    borderRadius: '10px',
+    borderRadius: '8px',
     padding: '14px 24px',
     cursor: 'pointer',
+    fontWeight: 'bold'
+  },
+  message: {
+    marginTop: '14px',
     fontWeight: 'bold',
-    fontSize: '15px'
+    color: '#234f7d'
   },
-
-  resultsArea: {
-    display: 'grid',
-    gap: '20px'
-  },
-
-  resultCard: {
+  result: {
     background: '#ffffff',
     borderLeft: '6px solid #2f5f91',
     borderRadius: '14px',
-    padding: '26px',
-    boxShadow: '0 3px 10px rgba(0,0,0,0.05)'
+    padding: '24px',
+    marginBottom: '18px',
+    boxShadow: '0 2px 10px rgba(0,0,0,.05)'
   },
-
-  resultTitle: {
-    color: '#12385b',
-    marginBottom: '16px'
-  },
-
-  formGrid: {
+  forms: {
     display: 'grid',
     gridTemplateColumns: '1fr 1fr',
     gap: '24px',
     marginTop: '24px'
-  },
-
-  input: {
-    width: '100%',
-    padding: '14px',
-    borderRadius: '10px',
-    border: '1px solid #b8c9d8',
-    marginBottom: '14px',
-    fontSize: '15px'
-  },
-
-  textarea: {
-    width: '100%',
-    minHeight: '120px',
-    padding: '14px',
-    borderRadius: '10px',
-    border: '1px solid #b8c9d8',
-    marginBottom: '14px',
-    resize: 'vertical',
-    fontSize: '15px'
-  },
-
-  message: {
-    marginTop: '14px',
-    color: '#234f7d',
-    fontWeight: 'bold'
   }
 }
